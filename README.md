@@ -59,3 +59,117 @@ Calibration:
 3. 음식은 이름은 비어있을 수 없으며, 재고 수량은 음수일 수 없다.
 ```
 
+### step2 문제
+
+```markdown
+Step 2: 음식 주문 처리 서비스 로직을 TDD로 구현하자
+
+🧭 STICC 기반 미션 세트
+Situation:
+사용자가 주문을 하면, 음식 재고를 확인하고 차감하는 서비스 로직이 필요하다.
+
+Task:
+서비스는 음식 ID와 주문 수량을 받아, 도메인 객체를 활용해 재고를 차감한다.
+
+Intent:
+도메인을 조립하는 서비스 계층의 역할을 TDD로 연습하며 익숙해진다.
+
+Concerns:
+도메인과 서비스 책임 분리, Repository를 어떻게 mock 할지, 예외를 어디서 처리해야 할지 감이 안 올 수 있다.
+
+Calibration:
+기존 도메인 중심 테스트에서 한 단계 나아가, mock/stub을 활용한 서비스 계층 테스트로 난이도를 i+1 상승시킨다.
+
+🛠 [작업 지시] Instruction
+서비스 클래스 이름: OrderService
+
+역할: 음식 주문 요청을 처리하며, 재고를 줄이는 작업을 수행한다.
+
+클래스 및 메서드 시그니처 예시:
+```
+
+```java
+public class OrderService {
+private final FoodRepository foodRepository;
+
+    public OrderService(FoodRepository foodRepository) {
+        this.foodRepository = foodRepository;
+    }
+
+    public void order(Long foodId, int quantity) {
+        Food food = foodRepository.findById(foodId)
+            .orElseThrow(() -> new FoodNotFoundException());
+        food.decreaseStock(quantity);
+        foodRepository.save(food);
+    }
+
+}
+```
+
+✅ 명확한 통과 기준
+음식 ID와 수량을 전달하면, 해당 음식의 재고가 차감된다
+→ 도메인 메서드 decreaseStock이 호출되고, 저장이 수행된다.
+
+음식이 존재하지 않으면 FoodNotFoundException이 발생한다
+
+재고가 부족하면 NotEnoughStockException이 서비스에서 전파된다 (도메인에서 발생)
+
+
+```java
+@ExtendWith(MockitoExtension.class)
+class OrderServiceTest {
+
+    @Mock
+    private FoodRepository foodRepository;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    @Test
+    void 음식이_존재하면_재고를_차감하고_저장한다() {
+        Food food = new Food("치킨", 10);
+        given(foodRepository.findById(1L)).willReturn(Optional.of(food));
+
+        orderService.order(1L, 3);
+
+        assertThat(food.getStockQuantity()).isEqualTo(7);
+        then(foodRepository).should().save(food);
+    }
+
+    @Test
+    void 음식이_없으면_예외가_발생한다() {
+        given(foodRepository.findById(1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.order(1L, 3))
+            .isInstanceOf(FoodNotFoundException.class);
+    }
+
+    @Test
+    void 재고가_부족하면_예외가_전파된다() {
+        Food food = new Food("치킨", 2);
+        given(foodRepository.findById(1L)).willReturn(Optional.of(food));
+
+        assertThatThrownBy(() -> orderService.order(1L, 5))
+            .isInstanceOf(NotEnoughStockException.class);
+    }
+
+}
+```
+
+💡 [힌트] Strategic Hint
+Repository는 mock 처리한다: 실제 저장이 아니라, 메서드 호출만 검증
+
+도메인에서 발생한 예외는 서비스에서 그대로 전파한다 (잡지 않는다)
+
+테스트 이름은 행동 단위로 명확하게 작성하자
+
+🧠 [전문가 사고 순서] Expert Micro-Sequence
+테스트 작성 우선: "음식 ID를 주면 재고가 줄어야 해" → 테스트로 먼저 명세
+
+mock으로 Repository의 동작을 stub한다
+
+도메인 로직은 실제 객체로 사용한다 (mock 아님)
+
+서비스는 도메인 메서드를 연결만 한다
+
+Repository는 save()가 호출되는지 should()로 검증

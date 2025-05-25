@@ -71,4 +71,18 @@ class FoodServiceTest {
                 .isInstanceOf(NotEnoughStockException.class)
                 .hasMessage("재고 부족");
     }
+
+    @Test
+    @DisplayName("상품이 존재하지 않으면 예외가 발생한다.")
+    void food_not_found_exception() {
+        // given
+        Long foodId = 1L;
+
+        when(foodRepository.findById(foodId)).thenReturn(Optional.empty());
+
+        // when // then
+        assertThatThrownBy(() -> foodService.decreaseStock(foodId, 3))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("상품을 찾을 수 없습니다.");
+    }
 }

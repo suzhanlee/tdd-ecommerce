@@ -3,6 +3,7 @@ package com.example.ecommerce.service;
 import com.example.ecommerce.domain.Food;
 import com.example.ecommerce.domain.FoodRepository;
 import com.example.ecommerce.dto.DecreaseFoodResponse;
+import com.example.ecommerce.exception.FoodNotFoundException;
 import com.example.ecommerce.exception.NotEnoughStockException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -82,7 +83,7 @@ class FoodServiceTest {
 
         // when // then
         assertThatThrownBy(() -> foodService.decreaseStock(foodId, 3))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(FoodNotFoundException.class)
                 .hasMessage("상품을 찾을 수 없습니다.");
     }
 }

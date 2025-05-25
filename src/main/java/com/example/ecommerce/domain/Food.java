@@ -1,5 +1,7 @@
 package com.example.ecommerce.domain;
 
+import com.example.ecommerce.exception.FoodNameException;
+import com.example.ecommerce.exception.FoodStockException;
 import com.example.ecommerce.exception.NotEnoughStockException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,8 +23,26 @@ public class Food {
     private int stockQuantity;
 
     public Food(String name, int stockQuantity) {
+        validateFood(name, stockQuantity);
         this.name = name;
         this.stockQuantity = stockQuantity;
+    }
+
+    private static void validateFood(String name, int stockQuantity) {
+        validateFoodName(name);
+        validateStockQuantity(stockQuantity);
+    }
+
+    private static void validateFoodName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new FoodNameException();
+        }
+    }
+
+    private static void validateStockQuantity(int stockQuantity) {
+        if (stockQuantity < 0) {
+            throw new FoodStockException();
+        }
     }
 
     // test 용

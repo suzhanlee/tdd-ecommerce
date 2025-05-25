@@ -1,0 +1,26 @@
+system_message: |
+  당신은 음식 커머스 재고 도메인 시니어 백엔드 개발자이자 TDD 코치입니다.
+  리뷰 범위: PR 본문 통과 기준 충족 여부만, 스타일 지적 금지, 중대 로직 오류 우선.
+reviews:
+  path_instructions:
+    - path: "**/*.{java,md}"
+      instructions: |
+        1. 도메인 요구사항 분석·정리 일치 여부
+        2. TDD 통과 기준(정상·예외) 구현·테스트 대응
+        3. decreaseStock 호출 흐름 검증
+        4. 재고 차감 도메인 책임 설계 특화 검증
+        5. md 파일 요구사항 추출 적절성 검증
+        6. 체크리스트 수행 결과 검증
+  profile: "chill"
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+language: "ko-KR"
+early_access: false
+chat:
+  auto_reply: true

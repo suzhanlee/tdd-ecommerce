@@ -48,6 +48,7 @@ public class Food {
     // test 용
     public Food(Long id, int quantity) {
         this.id = id;
+        this.name = "test-food-name";
         this.stockQuantity = quantity;
     }
 
